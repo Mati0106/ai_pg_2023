@@ -3,7 +3,7 @@
 print("Hello, world!")
 
 name = "Alice"
-age = 25age = 25
+age = 25
 
 for i in range(5):
     print("Hello, Python!")
