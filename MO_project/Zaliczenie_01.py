@@ -12,7 +12,7 @@ print(os.listdir("../MO_project"))
 import missingno as msno
 
 
-energy = pd.read_csv("all_energy_statistics.csv", parse_dates=True)
+energy = pd.read_csv("ai_pg_2023/MO_project/all_energy_statistics.csv", parse_dates=True)
 energy.head()
 
 # Find more information about the shape, features and unique values
