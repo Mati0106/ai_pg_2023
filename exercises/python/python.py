@@ -4,7 +4,7 @@ print("Hello, world!")
 
 name = "Alice"
 age = 25
-kw='sdsds'
+
 for i in range(5):
     print("Hello, Python!")
 
