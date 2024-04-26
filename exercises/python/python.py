@@ -168,7 +168,7 @@ my_car.display_info()
 def fibonacci():
     a, b = 0, 1
     while True:
-        yield a
+        yield a # not stored
         a, b = b, a + b
 
 
