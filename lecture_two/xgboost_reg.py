@@ -4,8 +4,8 @@ from sklearn.model_selection import train_test_split
 import pandas as pd
 from sklearn.metrics import mean_squared_error
 
-#dataset = pd.read_csv('diabetes.csv')
-dataset = pd.read_csv('lecture_two/diabetes.csv')
+dataset = pd.read_csv('diabetes.csv')
+#dataset = pd.read_csv('lecture_two/diabetes.csv')
 X = dataset.iloc[:,0:7]
 Y = dataset.iloc[:,7]
 
