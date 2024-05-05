@@ -3,7 +3,7 @@
 import pandas as pd
 
 # Load a CSV file into a DataFrame
-df = pd.read_csv('data.csv')
+df = pd.read_csv('./datasets/dummy.csv')
 
 # Display the first few rows of the DataFrame
 print(df.head())
@@ -26,7 +26,7 @@ print("\nDataFrame Shape:", df.shape)
 # Example 3: Selecting and Filtering Data
 
 # Select a single column
-column_data = df['Column_Name']
+column_data = df['A']
 
 # Select multiple columns
 multiple_columns = df[['Column1', 'Column2']]
