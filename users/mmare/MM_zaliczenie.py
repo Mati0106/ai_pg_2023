@@ -4,8 +4,8 @@ import seaborn as sns
 
 #1. Data exploration
 
-#Load a CSV file into a DataFrame from file "pasia"
-hr_data = pd.read_csv('./users/pasia/HR_data.csv')
+#Load a CSV file into a DataFrame from file
+hr_data = pd.read_csv('HR.csv')
 
 # Display the shape of the DataFrame / how many rows and columns do we have
 print("\nDataFrame Shape:", hr_data.shape)
