@@ -35,7 +35,7 @@ else:
 import matplotlib.pyplot as plt
 
 # I am creating histograms for the whole data
-data.hist(bins=80,figsize=(13, 9))  # Chart size: 10x8
+data.hist(bins=80,figsize=(13, 9))
 plt.tight_layout()
 plt.show()
 
@@ -135,7 +135,7 @@ else:
 # Deleting rows containing empty values
 data_upd_pca_cleaned = data_upd_pca.dropna()
 
-# Wyświetl informacje o DataFrame po usunięciu pustych wartości
+# Display DataFrame information after deleting empty values
 print("Number of rows before empty values are removed:", len(data_upd_pca))
 print("Number of rows after empty values are removed:", len(data_upd_pca_cleaned))
 
