@@ -1,6 +1,5 @@
 # PROJECT:
-# Pobrać zbiór danych z kaggle.com zastanowić sie jaki jest problem
-# określić problem w tych danych
+# Download data from kaggle.com - analyze the problem with data
 
 # The data set ifood_df.csv consists customers of XYZ company with data on:
 #   Customer profiles
