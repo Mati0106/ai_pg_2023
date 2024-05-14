@@ -37,12 +37,6 @@
 #   Complain=1 if customer complained in the last 2 years, 0 otherwise
 #   Country=Customer's location
 
-# What is the problem:
-# 1 Missing Data: Some cells in the CSV file are empty or contain null values.
-# 2 Imbalanced Classes: Imbalanced classes can lead to improper model learning, favoring the dominant class.
-# 3 Outliers: It will be necessary to identify and potentially process these outlier values.
-# 4 High Dimensionality: The data may be high-dimensional, meaning it has a large number of features.
-# Considering these issues and applying appropriate data processing techniques is crucial for effective machine learning model training.
 
 # Zadanie 1 - upload of data + analyze
 
@@ -73,6 +67,13 @@ correlation_matrix = df.corr()
 plt.figure(figsize=(12, 10))
 sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f")
 plt.show()
+
+# What is the problem:
+# 1 Missing Data: Some cells in the CSV file are empty or contain null values.
+# 2 Imbalanced Classes: Imbalanced classes can lead to improper model learning, favoring the dominant class.
+# 3 Outliers: It will be necessary to identify and potentially process these outlier values.
+# 4 High Dimensionality: The data may be high-dimensional, meaning it has a large number of features.
+# Considering these issues and applying appropriate data processing techniques is crucial for effective machine learning model training.
 
 # Conclusion
 # Analyzing the correlation heatmap helps identify highly correlated variables
