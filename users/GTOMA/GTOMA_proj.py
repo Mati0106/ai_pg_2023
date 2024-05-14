@@ -79,7 +79,6 @@ plt.show()
 # which may be redundant. That's why, I can decide to remove one of the variables
 # if they are very highly correlated
 
-
 # Zadanie 2 - Feature engennering
 
 #Age variable instead of year of birth
