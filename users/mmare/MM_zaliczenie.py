@@ -19,7 +19,7 @@ import plotly.figure_factory as ff
 init_notebook_mode(connected=True)
 sns.set_context("notebook")
 
-%matplotlib inline
+#%matplotlib inline
 sns.set_style("whitegrid")
 plt.style.use("fivethirtyeight")
 from sklearn.preprocessing import LabelEncoder
@@ -30,7 +30,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 from xgboost import XGBClassifier
-from sklearn.ensemble import AdaBoostClassifier
+#from sklearn.ensemble import AdaBoostClassifier
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.linear_model import LinearRegression
@@ -145,6 +145,10 @@ plt.figure(figsize=(12, 8))
 sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f", linewidths=0.5)
 plt.title('Correlation Matrix')
 plt.show()
+
+#plt.figure(figsize=(12,8))
+#sns.heatmap(hr_data.corr() , cmap = 'coolwarm')
+#plt.show()
 
 # Heatmap Plotting
 # Select only numeric columns
@@ -279,7 +283,8 @@ for column in hr_data.select_dtypes(include=['object']):
     label = LabelEncoder()
     hr_data["Attrition"] = label.fit_transform(hr_data.Attrition)
     hr_data.info()
-
+    hr_data["Travel_Rarely"] = label.fit_transform(hr_data.Travel_Rarely)
+    hr_data.info()
 
     #Data processing
 
@@ -348,8 +353,7 @@ for column in hr_data.select_dtypes(include=['object']):
   #  X_std = scaler.transform(X)X = hr_data.drop('Attrition', axis=1)
  #   y = hr_data.Attrition
 
- #   X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42,
-                                                        stratify=y)
+ #   X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42,stratify=y)
 
 
     def feature_imp(df, model):
