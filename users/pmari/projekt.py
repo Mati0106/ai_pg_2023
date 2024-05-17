@@ -56,11 +56,12 @@ df.drop("Heart Disease", axis=1, inplace=True)
 print(df.describe())
 
 # Explore correlations between features
-# plt.figure(figsize=(14,12))
-# corr_matrix = df.corr()
-# sns.heatmap(corr_matrix, annot=True, cmap='coolwarm')
-# plt.title('Correlation Matrix')
-# plt.show()
+plt.figure(figsize=(14,12))
+corr_matrix = df.corr()
+sns.heatmap(corr_matrix, annot=True, cmap='coolwarm')
+plt.title('Correlation Matrix')
+plt.show()
+# High correlation for Max HR
 
 # 3. Modeling
 # Split the data into features (X) and target variable (y)
@@ -83,6 +84,68 @@ y_pred = knn_classifier.predict(X_test)
 
 # Evaluate the model
 accuracy = accuracy_score(y_test, y_pred)
-print("Accuracy:", accuracy)
+print("Accuracy KNN classifier:", accuracy)
 print("\nClassification Report:")
 print(classification_report(y_test, y_pred))
+
+from sklearn.linear_model import LogisticRegression
+
+# Initialize and train a logistic regression model
+model = LogisticRegression(max_iter=1000)
+model.fit(X_train, y_train)
+
+# Evaluate the model on the test set
+accuracy = model.score(X_test, y_test)
+print("Model accuracy Logistic regression:", accuracy)
+# This example illustrates how to train a simple machine learning model (logistic regression) using scikit-learn.
+# Logistic regression gives better accuracy then KNN
+
+# Use the trained model to make predictions on the test set
+predictions = model.predict(X_test)
+
+# Display some sample predictions and corresponding true labels
+print("Sample predictions:")
+for i in range(5):
+    print("Predicted:", predictions[i], "| Actual:", y_test.iloc[i])
+# Here, we use the trained model to make predictions on the test set and compare them with the actual labels.
+
+# Example 5: Evaluating Model Performance
+
+from sklearn.metrics import classification_report, confusion_matrix
+
+# Generate a classification report and confusion matrix
+print("Classification Report:")
+print(classification_report(y_test, predictions))
+
+print("Confusion Matrix:")
+print(confusion_matrix(y_test, predictions))
+# Finally, this example demonstrates how to evaluate the performance of the trained model using metrics such as classification report and confusion matrix.
+
+import shap
+import sklearn
+
+X100 = shap.utils.sample(X, 100)  # 100 instances for use as the background distribution
+
+# a simple linear model
+model = sklearn.linear_model.LinearRegression()
+model.fit(X, y)
+print("Model coefficients:\n")
+for i in range(X.shape[1]):
+    print(X.columns[i], "=", model.coef_[i].round(5))
+
+# the waterfall_plot shows how we get from shap_values.base_values to model.predict(X)[sample_ind]
+
+# compute the SHAP values for the linear model
+explainer = shap.Explainer(model.predict, X100)
+shap_values = explainer(X)
+sample_ind = 20
+shap.plots.waterfall(shap_values[sample_ind], max_display=14)
+
+import interpret.glassbox
+# import matplotlib.pyplot as plt
+model_ebm = interpret.glassbox.ExplainableBoostingRegressor(interactions=0)
+model_ebm.fit(X, y)
+explainer_ebm = shap.Explainer(model_ebm.predict, X100)
+shap_values_ebm = explainer_ebm(X)
+shap.plots.scatter(shap_values_ebm[:, "Number of vessels fluro"])
+shap.plots.beeswarm(shap_values_ebm)
