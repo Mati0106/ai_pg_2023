@@ -17,7 +17,9 @@ from xgboost import XGBClassifier
 from sklearn.model_selection import train_test_split, cross_val_score, KFold
 from sklearn.metrics import accuracy_score, f1_score, recall_score, roc_auc_score, classification_report
 
-# Our file provide informarion about wine quaity. As we determine wine quality on a scale from 3 to 8 (where 8 means best and 3 worst), we have a classification problem.
+#My branch name is MartaB
+# Our file provide information about wine quality. As we determine wine quality on a scale from 3 to 8
+# (where 8 means best and 3 worst), we have a classification problem.
 df = pd.read_csv('wine.csv')
 print(df.head())
 
@@ -68,8 +70,9 @@ print("Sum of outliers (per category): ", outliers_cat)
 
 total_outliers = outliers_cat.sum()
 print("Total number of outliers:", total_outliers)
-print(
-    'A total of 147 outliers. Removing them will result in narrowing our dataset to 1212 observations, which will be around 76% of our initial set. Removing so many observations can impact future results, hence it was decided to not remove them.')
+print('A total of 147 outliers. Removing them will result in narrowing our dataset to 1212 observations, '
+      'which will be around 76% of our initial set. Removing so many observations can impact future results, '
+      'hence it was decided to not remove them.')
 
 # Compute summary statistics using describe()
 summary_stats = df.describe()
@@ -120,7 +123,8 @@ plt.title('Correlation Heatmap')
 plt.show()
 print('Correlation heatmap created')
 
-# Heatmap shows that quality correlations with residual sugar, free sulfur dioxide and pH are near 0, but should we remove them from our model?
+# Heatmap shows that quality correlations with residual sugar, free sulfur dioxide and pH are near 0,
+# but should we remove them from our model?
 corr_coeff = []
 is_significant = []
 
@@ -139,12 +143,14 @@ new_f = {
 results = pd.DataFrame(new_f)
 print(results)
 
-# Checking the significance of all features shows that all of them are significant, which advocates for leaving all feauters in our model.
+# Checking the significance of all features shows that all of them are significant,
+# which advocates for leaving all feauters in our model.
 
 # Example 2: Data Preprocessing
 
 # Feautre Engineering - encoding
-# Upon reading the dataset desription, grade above 6.5 is conidered good and grade below 6.5 is considered bad, hence we will scale the data (good ->1 bad ->0)
+# Upon reading the dataset desription, grade above 6.5 is conidered good and grade below 6.5
+# is considered bad, hence we will scale the data (good ->1 bad ->0)
 df['quality'] = df['quality'].apply(lambda x: 1 if x > 6.5 else 0)
 print(df.head())
 quality_counts = df['quality'].value_counts()
@@ -229,7 +235,8 @@ plt.show()
 
 # High alcohol content increases the likelihood that the wine will be good.
 # High values of total sulfur dioxide decrease the likelihood that the wine will be good.
-# There is a high chance that very low values of volatile acidity will classify the wine as good (lack of red dots on the right side, which means either we are not sure if it is good or it is good).
+# There is a high chance that very low values of volatile acidity will classify the wine as
+# good (lack of red dots on the right side, which means either we are not sure if it is good or it is good).
 
 # Optuna
 def objective(trial):
@@ -242,7 +249,7 @@ def objective(trial):
         n_estimators=n_estimators, max_depth=max_depth)
 
     return sklearn.model_selection.cross_val_score(
-        clf, X, y, n_jobs=-1, cv=3).mean()
+        clf, X, Y, n_jobs=-1, cv=3).mean()
 
 
 study = optuna.create_study(direction='maximize')
