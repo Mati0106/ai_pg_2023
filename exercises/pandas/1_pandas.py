@@ -3,7 +3,7 @@
 import pandas as pd
 
 # Load a CSV file into a DataFrame
-df = pd.read_csv('data.csv')
+df = pd.read_csv(r'C:\Users\Maria\Documents\GitHub\ai_pg_2023\datasets/cars.csv')
 
 # Display the first few rows of the DataFrame
 print(df.head())
@@ -26,19 +26,25 @@ print("\nDataFrame Shape:", df.shape)
 # Example 3: Selecting and Filtering Data
 
 # Select a single column
-column_data = df['Column_Name']
+column_data = df['name']
+column_data.head()
 
 # Select multiple columns
-multiple_columns = df[['Column1', 'Column2']]
+multiple_columns = df[['mpg', 'name']]
+
+multiple_columns.head()
 
 # Filter rows based on a condition
-filtered_data = df[df['Column_Name'] > 10]
+filtered_data = df[df['mpg'] > 10]
+
+filtered_data.head()
+
 # In this example, we demonstrate how to select specific columns and filter rows based on conditions in the DataFrame.
 
 # Example 4: Grouping and Aggregating Data
 
 # Group data by a column and calculate mean
-mean_by_group = df.groupby('Column_Name').mean()
+mean_by_group = df.groupby('year')['weight'].mean()
 
 # Perform multiple aggregations
 agg_results = df.groupby('Column_Name').agg({'Column1': 'mean', 'Column2': 'sum'})
