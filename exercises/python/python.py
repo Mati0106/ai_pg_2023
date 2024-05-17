@@ -66,7 +66,7 @@ else:
 
 # Define a dictionary of student names and their corresponding ages
 students = {"Alice": 20, "Bob": 22, "Charlie": 21, "David": 23}
-
+print('Hello')
 # Accessing values in the dictionary
 print("Bob's age:", students["Bob"])
 
