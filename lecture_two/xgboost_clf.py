@@ -4,8 +4,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 import pandas as pd
 
-
-dataset = pd.read_csv('lecture_two/diabetes.csv')
+dataset = pd.read_csv('diabetes.csv')
+#dataset = pd.read_csv('lecture_two/diabetes.csv')
 X = dataset.iloc[:,0:8]
 Y = dataset.iloc[:,8]
 
