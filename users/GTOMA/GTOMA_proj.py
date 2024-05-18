@@ -41,9 +41,18 @@ print("Number of rows and columns are:", df.shape)
 print("Column Names and Data Types:")
 print(df.dtypes)
 
-# Preview statistics
+# Preview charts
+import matplotlib.pyplot as plt
+df.hist(figsize=(12,12))
+plt.show()
 
-print("\nSummary Statistics:")
+#Preview data heat map
+plt.figure(figsize=(16,16))
+sns.heatmap(df.corr(),annot=True,fmt=".0%")
+plt.show()
+
+# Preview statistics
+print("Summary Statistics:")
 print(df.describe())
 
 puste=df.isnull().sum()
@@ -70,7 +79,7 @@ sns.heatmap(corr_matrix, annot=True, cmap='coolwarm')
 plt.title('Correlation Matrix')
 plt.show()
 
-# High correlation for Chest Pain
+# High correlation for Couching of Blood
 
 
 # EXERCISE 3. Modelling
