@@ -1,194 +1,198 @@
 # PROJECT:
 # Download data from kaggle.com - analyze the problem with data
 
-# The data set ifood_df.csv consists customers of XYZ company with data on:
-#   Customer profiles
-#   Product preferences
-#   Campaign successes/failures
-#   Channel performance
+Lung Cancer Prediction
 
-#   ID=Customer's unique identifier
-#   Year_Birth=Customer's birth year
-#   Education=Customer's education level
-#   Marital_Status=Customer's marital status
-#   Income=Customer's yearly household income
-#   Kidhome=Number of children in customer's household
-#   Teenhome=Number of teenagers in customer's household
-#   Dt_Customer=Date of customer's enrollment with the company
-#   Recency=Number of days since customer's last purchase
-#   MntWines=Amount spent on wine in the last 2 years
-#   MntFruits=Amount spent on fruits in the last 2 years
-#   MntMeatProducts=Amount spent on meat in the last 2 years
-#   MntFishProducts=Amount spent on fish in the last 2 years
-#   MntSweetProducts=Amount spent on sweets in the last 2 years
-#   MntGoldProds=Amount spent on gold in the last 2 years
-#   NumDealsPurchases=Number of purchases made with a discount
-#   NumWebPurchases=Number of purchases made through the company's web site
-#   NumCatalogPurchases=Number of purchases made using a catalogue
-#   NumStorePurchases=Number of purchases made directly in stores
-#   NumWebVisitsMonth=Number of visits to company's web site in the last month
-#   AcceptedCmp3=1 if customer accepted the offer in the 3rd campaign, 0 otherwise
-#   AcceptedCmp4=1 if customer accepted the offer in the 4th campaign, 0 otherwise
-#   AcceptedCmp5=1 if customer accepted the offer in the 5th campaign, 0 otherwise
-#   AcceptedCmp1=1 if customer accepted the offer in the 1st campaign, 0 otherwise
-#   AcceptedCmp2=1 if customer accepted the offer in the 2nd campaign, 0 otherwise
-#   Response=1 if customer accepted the offer in the last campaign, 0 otherwise
-#   Complain=1 if customer complained in the last 2 years, 0 otherwise
-#   Country=Customer's location
+# Classification
+
+# This dataset contains information on patients with lung cancer, including their age, gender, air pollution exposure,
+#  alcohol use, dust allergy, occupational hazards, genetic risk, chronic lung disease, balanced diet, obesity, smoking,
+# passive smoker, chest pain, coughing of blood, fatigue, weight loss ,shortness of breath ,wheezing ,
+# swallowing difficulty ,clubbing of finger nails and snoring
+
+# Basing on data above I will build a mode to asset Lung Cancer Prediction (Cancer/ No_Cancer)
 
 
-# Zadanie 1 - upload of data + analyze
+# EXERCISE 1. Data read and analyze
 
-# Import libraries
-import pandas as pd
+# Import packages and libraries
 import numpy as np
-import seaborn as sns
+import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score, classification_report
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
 
-# Load the data
-df = pd.read_csv('datasets/ifood_df.csv')
+# Load the data from the file cancer_data.csv to DataFrame "df"
+df = pd.read_csv('datasets/cancer_data.csv')
 
 # Data analysis
-print(df.head())  # Preview first few rows
-print(df.info())   # Information about the data, checking types and missing values
+# Preview first few rows
+print(df.head())
+# Information about the data, checking types and missing values
+print(df.info())
 
-# The target variable AcceptedCmpOverall consists of binary (0 or 1) values,
-# it indicates a classification problem. Therefore, clf is performing classification.
+# Find more information about the shape, features and unique values
+print("Number of rows and columns are:", df.shape)
 
-# Check for null values
-print(df.isnull().sum())  # Sum of missing values in each column
+# Preview the column names and data types
+print("Column Names and Data Types:")
+print(df.dtypes)
 
-# Outlier detection
-# Methods such as boxplot or defining custom rules like z-score
+# Preview statistics
 
-# Correlations
-correlation_matrix = df.corr()
-plt.figure(figsize=(12, 10))
-sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f")
+print("\nSummary Statistics:")
+print(df.describe())
+
+puste=df.isnull().sum()
+print("Suma pustych wierszy:",puste)
+
+
+# EXERCISE 2. Feature engennering
+
+# Mapping
+
+mapping={"Cancer":0, "No_Cancer":1}
+
+df["Output"]=[mapping[value] for value in df["Lung Cancer"]]
+df.drop("Lung Cancer", axis=1, inplace=True)
+
+print(df.describe())
+
+
+# Exploring correlations between features
+
+plt.figure(figsize=(14,12))
+corr_matrix = df.corr()
+sns.heatmap(corr_matrix, annot=True, cmap='coolwarm')
+plt.title('Correlation Matrix')
 plt.show()
 
-# What is the problem:
-# 1 Missing Data: Some cells in the CSV file are empty or contain null values.
-# 2 Imbalanced Classes: Imbalanced classes can lead to improper model learning, favoring the dominant class.
-# 3 Outliers: It will be necessary to identify and potentially process these outlier values.
-# 4 High Dimensionality: The data may be high-dimensional, meaning it has a large number of features.
-# Considering these issues and applying appropriate data processing techniques is crucial for effective machine learning model training.
-
-# Conclusion
-# Analyzing the correlation heatmap helps identify highly correlated variables
-# which may be redundant. That's why, I can decide to remove one of the variables
-# if they are very highly correlated
-
-# Zadanie 2 - Feature engennering
-
-#Age variable instead of year of birth
-#Numb_Days variable counts days a customer is in the company
-#Family variable counts the number of family members
-#TotalPurchases total purchase places
-#Variable Spending is a sum of the amount spent on product categories
-#TotalCampaignsAcc is total acceptance of advertising campaigns
+# High correlation for Chest Pain
 
 
-data['Age'] = 2023-data['Year_Birth']
-data['Customer_Days'] = data['Dt_Customer'].max() - data['Dt_Customer']
-data['Family'] = data['Marital_Status']+data['Kidhome']+data['Teenhome']
-data['TotalPurchases'] = data['NumWebPurchases']+data['NumCatalogPurchases']+data['NumStorePurchases']
-data['Spending'] = data.filter(like='Mnt').sum(axis=1)
-data['TotalCampaignsAcc'] = data.filter(like='Accepted').sum(axis=1)+data['Response']
+# EXERCISE 3. Modelling
 
-data[['Age','Customer_Days','Family','TotalPurchases','Spending','TotalCampaignsAcc']].head(3)
+# Data splitting into features (X) and target variable (y)
+X = df.drop('Output', axis=1)
+y = df['Output']
 
-data['Customer_Days'] = data['Customer_Days'].astype(str).str.replace(' days', '')
-# Convert the column to integer data type
-data['Customer_Days'] = pd.to_numeric(data['Customer_Days'], downcast='integer')
+# Standardize features
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
 
-data.drop(['Year_Birth','Dt_Customer'],axis=1,inplace=True)
+# Data splitting into training and test sets
+X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
 
-#3. Zadanie 3  - Modelling
+# Initializing and train a K-Nearest Neighbors classifier
+knn_classifier = KNeighborsClassifier(n_neighbors=5)
+knn_classifier.fit(X_train, y_train)
 
-# Importing models
-from sklearn.model_selection import train_test_split
+# Predictions on the test set
+y_pred = knn_classifier.predict(X_test)
+
+# Evaluating the model
+accuracy = accuracy_score(y_test, y_pred)
+
+print("KNN classifier accuracy :", accuracy)
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred))
+
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, roc_auc_score
-import xgboost as xgb
 
-# Splitting data into train and test sets
-X = df.drop(columns=['Response'])  # Model input
-y = df['Response']  # Model output
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-# Benchmark model
-# Logistic Regression
-lr = LogisticRegression()
-lr.fit(X_train, y_train)
-y_pred_lr = lr.predict(X_test)
-acc_lr = accuracy_score(y_test, y_pred_lr)
-roc_lr = roc_auc_score(y_test, y_pred_lr)
-
-print("Accuracy for Logistic Regression:", acc_lr)
-print("ROC AUC for Logistic Regression:", roc_lr)
-
-# Main model
-# XGBoost
-model_xgb = xgb.XGBClassifier()
-model_xgb.fit(X_train, y_train)
-y_pred_xgb = model_xgb.predict(X_test)
-acc_xgb = accuracy_score(y_test, y_pred_xgb)
-roc_xgb = roc_auc_score(y_test, y_pred_xgb)
-
-print("Accuracy for XGBoost:", acc_xgb)
-print("ROC AUC for XGBoost:", roc_xgb)
-
-#4. Zadanie 4. - Optymalisation of model
-
-# Import libraries
-import optuna
-
-# Define objective function
-def objective(trial):
-    # Parameters to optimize
-    max_depth = trial.suggest_int('max_depth', 2, 10)
-    learning_rate = trial.suggest_uniform('learning_rate', 0.0001, 0.1)
-    n_estimators = trial.suggest_int('n_estimators', 100, 1000)
-
-    # XGBoost model with optimized parameters
-    model = xgb.XGBClassifier(
-        max_depth=max_depth,
-        learning_rate=learning_rate,
-        n_estimators=n_estimators
-    )
-    model.fit(X_train, y_train)
-    y_pred = model.predict(X_test)
-
-    return accuracy_score(y_test, y_pred)
-
-# Setting up optimization
-study = optuna.create_study(direction='maximize')
-study.optimize(objective, n_trials=100)
-
-# Displaying the best parameters
-print("Best parameters:", study.best_params)
-
-#5. Zadanie 5. - Shap'ley values and interpretation
-
-# Import libraries
-import shap
-
-# Creating XGBoost model with selected parameters
-model = xgb.XGBClassifier(max_depth=5, learning_rate=0.1, n_estimators=500)
+# Initializing and train a Logistic Regression model
+model = LogisticRegression(max_iter=1000)
 model.fit(X_train, y_train)
 
-# Creating explainer object
-explainer = shap.Explainer(model)
+# Evaluating the model on the test set
+accuracy = model.score(X_test, y_test)
+print("Model accuracy Logistic regression:", accuracy)
+
+# We see how to train a machine learning logistic regression model using scikit-learn which gives better accuracy than KNN.
+
+# Using trained model to make predictions on the test set
+predictions = model.predict(X_test)
+
+# Preview sample predictions and corresponding true labels
+print("Sample predictions:")
+for i in range(5):
+    print("Predicted:", predictions[i], "| Actual:", y_test.iloc[i])
+
+# Trained model was used to make predictions on the test set and comparison with the actual labels.
+
+
+# EXERCISE 4. - OPTUNA Optimalisation of model
+
+# Encoding target variable
+label_encoder = LabelEncoder()
+df['Level'] = label_encoder.fit_transform(df['Level'])
+
+# Spliting data into features and target
+X = df.drop(columns=['index', 'Patient Id', 'Level'])
+y = df['Level']
+
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Define the objective function for Optuna optimization
+def objective(trial):
+    n_estimators = trial.suggest_int('n_estimators', 50, 300)
+    max_depth = trial.suggest_int('max_depth', 2, 32, log=True)
+    min_samples_split = trial.suggest_int('min_samples_split', 2, 16)
+    min_samples_leaf = trial.suggest_int('min_samples_leaf', 1, 16)
+
+    # Define the model with suggested hyperparameters
+    model = RandomForestClassifier(
+        n_estimators=n_estimators,
+        max_depth=max_depth,
+        min_samples_split=min_samples_split,
+        min_samples_leaf=min_samples_leaf,
+        random_state=42
+    )
+
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    accuracy = accuracy_score(y_test, y_pred)
+
+    return accuracy
+
+# Optimize hyperparameters using Optuna
+study = optuna.create_study(direction='maximize')
+study.optimize(objective, n_trials=50)
+
+# Train the final model with the best hyperparameters
+best_params = study.best_params
+best_model = RandomForestClassifier(**best_params, random_state=42)
+best_model.fit(X_train, y_train)
+
+
+# EXERCISE 5: Shap'ley values and evaluating model performance
+
+import shap
+from sklearn.metrics import classification_report, confusion_matrix
+
+# Generating classification report and confusion matrix
+print("Classification Report:")
+print(classification_report(y_test, predictions))
+print("Confusion Matrix:")
+print(confusion_matrix(y_test, predictions))
+
+# Calculating Shap'ley values
+explainer = shap.TreeExplainer(best_model)
 shap_values = explainer.shap_values(X_test)
+shap.summary_plot(shap_values, X_test, plot_type="bar")
 
-# Shapley values
-shap.summary_plot(shap_values, X_test)
+# Interpret Shap'ley values
+feature_importance = pd.DataFrame(list(zip(X_test.columns, np.mean(np.abs(shap_values), axis=0))),
+                                  columns=['Feature', 'Importance'])
+feature_importance = feature_importance.sort_values(by='Importance', ascending=False)
+print("Feature Importance:")
+print(feature_importance)
 
-# Partial Dependence Plot
+# Evaluating the model's performance
+y_pred = best_model.predict(X_test)
+print("Classification Report:")
+print(classification_report(y_test, y_pred))
 
-from pdpbox import pdp, get_dataset, info_plots
-feature_names = X.columns.tolist()
-pdp_goals = pdp.pdp_isolate(model=model, dataset=X_test, model_features=feature_names, feature='MntWines')
-pdp.pdp_plot(pdp_goals, 'MntWines')
-plt.show()
