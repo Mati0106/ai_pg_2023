@@ -2,8 +2,11 @@
 
 print("Hello, world!")
 
-name = "Alice"
+name = "Barbara"
 age = 25
+
+print(name)
+print(age)
 
 for i in range(5):
     print("Hello, Python!")
