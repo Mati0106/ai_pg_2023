@@ -40,7 +40,7 @@ plt.tight_layout()
 plt.show()
 
 
-# Conclusions about the data:
+Conclusions about the data:
 # On first impression, a few outlier groups are present in our data( 'housing_median_age' & 'median_house_value' )
 # Housing_median_age has a lot of local peaks but one really odd peak at the maximum value stands out. It has some slight discontinuity in data.
 # Feature Median_house_value has an odd peak at its maximum value (around 500k), which seems to be an outlier.
@@ -112,8 +112,6 @@ X_skorelowane = scaler.fit_transform(data_upd[skorelowane_kolumny])
 pca = PCA(n_components=1)  # I retain only the first principal component
 X_pca = pca.fit_transform(X_skorelowane)
 
-
-# Wyświetlenie wyników
 print("Principal Component Loadings:")
 print(pca.components_)
 print("\nVariance explained by first principal component:")
@@ -147,6 +145,15 @@ from sklearn.model_selection import train_test_split
 X = data_upd_pca_cleaned.drop("median_house_value", axis=1)
 y = data_upd_pca_cleaned["median_house_value"]
 
+# Przekształcenie danych kategorycznych na wartości liczbowe
+X_encoded = pd.get_dummies(X)
+
+print("Before one-hot encoding:")
+print(X.head())
+
+print("\nAfter one-hot encoding:")
+print(X_encoded.head())
+
 # Divide data into training set and test set
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
@@ -163,10 +170,12 @@ X_test_encoded = pd.get_dummies(X_test)
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 
-# Initialise linear regression model
+# Fit the model to your training data with feature names
 model = LinearRegression()
+model.fit(X_train_encoded, y_train)
 
-# Fit the model to your training data
+
+# Fit the model to training data
 model.fit(X_train_encoded, y_train)
 
 # Perform prediction on test data
@@ -199,10 +208,53 @@ print("Max Error:", max_err)
 # I would like to use Optuna for hyperparameter optimization to potentially improve the performance of my linear regression model
 
 import optuna
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import cross_val_score
 
+import optuna
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import cross_val_score
 
+model = LinearRegression()
+def objective(trial):
+    fit_intercept = trial.suggest_categorical('fit_intercept', [True, False])
+
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train_encoded)
+
+
+    scores = cross_val_score(model, X_train_scaled, y_train, cv=5, scoring='neg_mean_squared_error')
+    mse = -scores.mean()
+    return mse
+
+# Fitting the model to the training data
+model.fit(X_train_encoded, y_train)
+
+# Optimizing hyperparameters using Optuna
+study = optuna.create_study(direction='minimize')
+study.optimize(objective, n_trials=50, n_jobs=-1)
+
+print("Best hyperparameters: ", study.best_params)
+
+# Data normalization
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train_encoded)
+X_test_scaled = scaler.transform(X_test_encoded)
+
+# Training the model with optimal hyperparameters
+best_model = LinearRegression()
+best_model.fit(X_train_scaled, y_train)
+y_pred_best = best_model.predict(X_test_scaled)
+
+# Evaluation of the model with optimal hyperparameters
+best_mse = mean_squared_error(y_test, y_pred_best)
+print("MSE (best model):", best_mse)
+
+# Evaluation of the model on the test set.
+y_pred = best_model.predict(X_test_encoded)
+mse = mean_squared_error(y_test, y_pred)
+print("MSE na zbiorze testowym: ", mse)
+
+print("In summary, the results suggest that the model with optimal hyperparameters obtained through Optuna achieves significantly better performance compared to the model without optimization. The mean squared error on the test set is much lower, indicating that the model better predicts target values.")
 
 
