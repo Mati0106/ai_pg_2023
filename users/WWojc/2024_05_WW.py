@@ -2,8 +2,8 @@
 
 # task - use the historical data solar plant production and weather parameters and try to predict production using
 # weather forecast.
-# I use the data from kaggle - /kaggle/input/solar-power-generation-data/Plant_1_Weather_Sensor_Data.csv
-# /kaggle/input/solar-power-generation-data/Plant_1_Generation_Data.csv
+# I use the data from kaggle - /kaggle/input/solar-power-generation-data/Plant_2_Weather_Sensor_Data.csv
+# /kaggle/input/solar-power-generation-data/Plant_2_Generation_Data.csv
 
 import pandas as pd
 import numpy as np
@@ -16,6 +16,8 @@ weather_data = pd.read_csv('users/WWojc/Data/Plant_2_Weather_Sensor_Data.csv')
 generation_data.info()
 weather_data.info()
 generation_data.head()
+generation_data.describe()
+
 # check is there any missing value
 # we have complete data, without any null
 
@@ -217,3 +219,52 @@ plt.show()
 # and by the irradiation.
 
 
+# Predicting AC_POWER
+
+# AC_POWER generation of the plant, depend on irradiation, ambient temperature and module temperature.
+# To predict AC_POWER by the weather forecast, we can use only irradiation data and ambient temperature.
+# Module temperature linear depend of ambient temperature.
+
+predict_reg = gen_wea[['AC_POWER', 'IRRADIATION', 'AMBIENT_TEMPERATURE']]
+from sklearn import datasets, linear_model
+from sklearn.model_selection import train_test_split
+
+y=predict_reg['AC_POWER']
+X=predict_reg[['IRRADIATION','AMBIENT_TEMPERATURE']]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=5)
+print(X_train.shape, y_train.shape)
+print(X_test.shape, y_test.shape)
+
+lm = linear_model.LinearRegression()
+model = lm.fit(X_train, y_train)
+pred_y_train = lm.predict(X_train)
+pred_y_test = lm.predict(X_test)
+
+#plt.scatter(y_test, predictions)
+from sklearn.metrics import r2_score, mean_squared_error
+
+#Model Evaluation on Training data
+
+R2_train = r2_score(y_train, pred_y_train)
+mse_train = mean_squared_error(y_train, pred_y_train)
+print('R2 for Train dataset:', R2_train, '  '   'MSE for Train dataset:', mse_train)
+
+#Model Evaluation on Testing data
+
+R2_test = r2_score(y_test, pred_y_test)
+mse_test = mean_squared_error(y_test, pred_y_test)
+print('R2 for Test dataset:', R2_test, '  '   'MSE for Test dataset:', mse_test)
+
+# R2 value of Train and Test Datasets are almost equal. Model is valid and approx. 83% of AC Power variation
+# is explained by Irradiation and Ambient Temperature.
+
+print('Slope:' ,model.coef_)
+print('Intercept:', model.intercept_)
+
+
+# AC Power output is highly dependent on Irradition. With 1 unit increase in Irradiation,
+# AC Power output increases by approx 17.5MW With 1 deg increase in Ambient Temperature AC Power output
+# increases by 120 kW.
+# Using the Weather forecast data (Irradiation and Ambient Temperature), AC Power output of the plant can be
+# predicted with a good accuracy.
