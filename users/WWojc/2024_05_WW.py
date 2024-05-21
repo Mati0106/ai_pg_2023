@@ -1,37 +1,44 @@
 # Loading and Exploring a Dataset
 
-
-# 22 inervters, production data [Wh] from every, every inverters has name "source key"
-# wheather sensors - one weather station, we meassure ambient temperature [st. C],
-# module temperature [st. C] and irradiation [Wh/m2]
+# task - use the historical data solar plant production and weather parameters and try to predict production using
+# weather forecast.
+# I use the data from kaggle - /kaggle/input/solar-power-generation-data/Plant_1_Weather_Sensor_Data.csv
+# /kaggle/input/solar-power-generation-data/Plant_1_Generation_Data.csv
 
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+generation_data = pd.read_csv('users/WWojc/Data/Plant_2_Generation_Data.csv')
+weather_data = pd.read_csv('users/WWojc/Data/Plant_2_Weather_Sensor_Data.csv')
 
-
-
-generation_data = pd.read_csv('2024_05_WW_Praca_zal/Data/Plant_1_Generation_Data.csv')
-weather_data = pd.read_csv('2024_05_WW_Praca_zal/Data/Plant_1_Weather_Sensor_Data.csv')
-generation_data.info()
-weather_data.info()
-
-# check, how many inverters we have in this plant
-print('The number of inverter for data_time {} is {}'.format('15-05-2020 23:00', generation_data[generation_data.DATE_TIME == '15-05-2020 23:00']['SOURCE_KEY'].nunique()))
-
-# check is there any missing value
 generation_data.info()
 weather_data.info()
 generation_data.head()
+# check is there any missing value
+# we have complete data, without any null
 
-# sum up values from every inverters
+# check, how many inverters we have in this plant
+print('The number of inverter for data_time {} is {}'.format('16-05-2020 00:15',
+generation_data[generation_data.DATE_TIME == '16-05-2020 00:15']['SOURCE_KEY'].nunique()))
+
+
+# In this solar plant, we have 22 inverters, used to change DC power to AC power.
+# Data set including data about energy production [kW] from every inverters (each inverters has name "source key")
+# recorded in 15 minutes interval,
+# weather data including parameters from one weather station on this PV plant, recorded at 15 minutes intervals:
+# ambient temperature [st. C],
+# module temperature [st. C]
+# irradiation [Wh/m2]
+
+# sum up values from every inverters;
+# thanks to this, we have total plant productions in every 15 minutes,
 generation_data = generation_data.groupby('DATE_TIME')[['DC_POWER', 'AC_POWER', 'DAILY_YIELD', 'TOTAL_YIELD']].agg('sum')
 generation_data = generation_data.reset_index()
 generation_data.head()
 
-# Adjust datetime format
+# Adjust datetime format - we have two, new columns with separated information about date and time,
 generation_data['DATE_TIME'] = pd.to_datetime(generation_data['DATE_TIME'], errors='coerce')
 generation_data['time'] = generation_data['DATE_TIME'].dt.time
 generation_data['date'] = pd.to_datetime(generation_data['DATE_TIME'].dt.date)
@@ -46,19 +53,22 @@ weather_data.info()
 generation_data.head()
 weather_data.head()
 
+# erase unneeded rows
 del weather_data['PLANT_ID']
 del weather_data['SOURCE_KEY']
 weather_data.tail()
 
-# Production analyse
-
-generation_data.plot(x='time', y='DC_POWER', style='.', figsize=(15, 8))
+# DC Production analyse
+generation_data.plot(x= 'time', y='DC_POWER', style='.', figsize = (15, 8))
 generation_data.groupby('time')['DC_POWER'].agg('mean').plot(legend=True, colormap='Reds_r')
-# plt.label('DC Power')
-# plt.title('DC POWER plot')
+plt.ylabel('DC Power')
+plt.title('DC POWER plot')
 plt.show()
 
-# show to dc power producted by Plant in each day
+# PV plant produces energy only between 05:33:20 and 18:00:00. Over of that time, production is null - that caused to
+# weak sunlight power.
+
+# PV production analyse in every day at the same time,
 calendar_dc = generation_data.pivot_table(values='DC_POWER', index='time', columns='date')
 calendar_dc.tail()
 
@@ -72,41 +82,32 @@ def multi_plot(data=None, row=None, col=None, title='DC Power'):
         data[cols[i - 1]].plot(ax=ax, style='k.')
         ax.set_title('{} {}'.format(title, cols[i - 1]))
 
-
 multi_plot(data=calendar_dc, row=9, col=4)
 
+# every day production is almost similar. From time to time the production during the day is lower - it's
+# might have been caused by cloudy skies
+
+
+# Total daily production:
 daily_dc = generation_data.groupby('date')['DC_POWER'].agg('sum')
 daily_dc.plot.bar(figsize=(15, 5), legend=True)
 plt.title('Daily DC Power')
 plt.show()
 
-# daily production
-
+# Total Daily production in each hours:
 generation_data.plot(x='time', y='DAILY_YIELD', style='b.', figsize=(15, 5))
 generation_data.groupby('time')['DAILY_YIELD'].agg('mean').plot(legend=True, colormap='Reds_r')
 plt.title('DAILY YIELD')
 plt.ylabel('Yield')
 plt.show()
 
+# Total Daily production increasing between 05:33:20 and 18:00:00,
 daily_yield = generation_data.pivot_table(values='DAILY_YIELD', index='time', columns='date')
-# we plot all daily yield
-multi_plot(data=daily_yield.interpolate(), row=9, col=4, title='DAILY YIELD')
-multi_plot(data=daily_yield.diff()[daily_yield.diff() > 0], row=9, col=4, title='new yield')
-
 daily_yield.boxplot(figsize=(18, 5), rot=90, grid=False)
 plt.title('DAILY YIELD IN EACH DAY')
 plt.show()
 
-daily_yield.diff()[daily_yield.diff() > 0].boxplot(figsize=(18, 5), rot=90, grid=False)
-plt.title('DAILY YIELD CHANGE RATE EACH 15 MIN EACH DAY')
-plt.show(block = True)
-
-# Only two days have an outlier 2020-03-06 and 2020-05-21.
-#we compute a daily yield for each date.
-dyield = generation_data.groupby('date')['DAILY_YIELD'].agg('sum')
-dyield.plot.bar(figsize=(15,5), legend=True)
-plt.title('Daily YIELD')
-plt.show()
+# every day total production changes, but we haven't outliers
 
 
 # Temperature analyse
@@ -124,55 +125,20 @@ ambient.boxplot(figsize=(15,5), grid=False, rot=90)
 plt.title('AMBIENT TEMPERATURE BOXES')
 plt.ylabel('Temperature (°C)')
 
+# three days contains outliers
 ambient_temp = weather_data.groupby('date')['AMBIENT_TEMPERATURE'].agg('mean')
 ambient_temp.plot(grid=True, figsize=(15,5), legend=True, colormap='Oranges_r')
 plt.title('AMBIENT TEMPERATURE 15 MAY- 17 JUNE')
 plt.ylabel('Temperature (°C)')
 
-ambient_change_temp = (ambient_temp.diff()/ambient_temp)*100
-ambient_change_temp.plot(figsize=(15,5), grid=True, legend=True)
-plt.ylabel('%change')
-plt.title('AMBIENT TEMPERATURE %change')
+# In this time, the ambient temperature in this plant was between 24 and 31 st. C. June was little coldest
 
-# Comment
-# Sunday 17 May 2020 to Monday 18 May 2020, the ambient Temperature decreases to 10%.
-# Monday 18 May 2020 to Tuesday 19 May 2020, the ambient Temperature increases to 15% and tomorrow decreases to 5%.
-# Wednesday 20 May 2020 to Thursday 21 May 2020, the ambient Temperature increases to 10% and tomorrow decreases to 15%.
-# June month's, the ambiant Temperature %change stabilize between -2.5 and 2.5%.
-
-from scipy.signal import periodogram
-
-decomp = sm.tsa.seasonal_decompose(ambient_temp)
-cols = ['trend', 'seasonal', 'resid']  # take all column
-data = [decomp.trend, decomp.seasonal, decomp.resid]
-gp = plt.figure(figsize=(15, 15))
-
-gp.subplots_adjust(hspace=0.5)
-for i in range(1, len(cols) + 1):
-    ax = gp.add_subplot(3, 1, i)
-    data[i - 1].plot(ax=ax)
-    ax.set_title('{}'.format(cols[i - 1]))
 
 weather_data.plot(x='time', y='MODULE_TEMPERATURE', figsize=(15,8), style='b.')
 weather_data.groupby('time')['MODULE_TEMPERATURE'].agg('mean').plot(colormap='Reds_r', legend=True)
 plt.title('DAILY MODULE TEMPERATURE & MEAN(red)')
 plt.ylabel('Temperature(°C)')
 
-module_temp = weather_data.pivot_table(values='MODULE_TEMPERATURE', index='time', columns='date')
-module_temp.boxplot(figsize=(15,5), grid=False, rot=90)
-plt.title('MODULE TEMPERATURE BOXES')
-plt.ylabel('Temperature (°C)')
-
-mod_temp = weather_data.groupby('date')['MODULE_TEMPERATURE'].agg('mean')
-mod_temp.plot(grid=True, figsize=(15,5), legend=True)
-plt.title('MODULE TEMPERATURE 15 MAY- 17 JUNE')
-plt.ylabel('Temperature (°C)')
-
-# May month's have: 2 huges hot date 21 and 29.
-chan_mod_temp = (mod_temp.diff()/mod_temp)*100
-chan_mod_temp.plot(grid=True, legend=True, figsize=(15,5))
-plt.ylabel('%change')
-plt.title('MODULE TEMPERATURE %change')
 
 # Irradiation analyse
 
@@ -189,11 +155,6 @@ plt.title('IRRADIATION BOXES')
 rad = weather_data.groupby('date')['IRRADIATION'].agg('sum')
 rad.plot(grid=True, figsize=(15,5), legend=True)
 plt.title('IRRADIATION 15 MAY- 17 JUNE')
-
-# N.B Thursday 21 May 2020 is a date where plant 1 are:
-# more produce dc power.
-# ambient temperature, module temperature are maximun.
-# This date is very special.
 
 # Correlation
 
@@ -215,66 +176,44 @@ gen_wea.info()
 
 gen_wea.corr(method = 'spearman')
 
-# DAILY_YIELD is not correlated with all feature but AMBIENT_TEMPERATURE is moreless correlated.
-# TOTAL_YIELD is also not correlated with all feature. I remove it in the correlation matrix.
+# DAILY_YIELD and TOTAL_YIELD it's not correlated with any feature.
 
 correlation = gen_wea.drop(columns=['DAILY_YIELD', 'TOTAL_YIELD']).corr(method = 'spearman')
 plt.figure(dpi=100)
 sns.heatmap(correlation, robust=True, annot=True, fmt='0.3f', linewidths=.5, square=True)
 plt.show()
 
+# we can observe that:
+# AC_POWER and DC_POWER are correlated, but it's normal, beacuse this two parameters we measured in input and output
+# on inverter. In the further analysis, we can use only AC_POWER.
+# AC_POWER is correlated with AMBIENT_TEMPERATURE, MODULE_TEMPERATURE and IRRADIATION
+
+
 # we make pairplot
-sns.pairplot(gen_wea.drop(columns=['DAILY_YIELD', 'TOTAL_YIELD']))
-plt.show()
 
-#we plot dc power vs ac power
-plt.figure(dpi=100)
-sns.lmplot(x='DC_POWER', y='AC_POWER', data=gen_wea)
-plt.title('Regression plot')
-plt.show()
-
-#This graph said that inverter convert dc power to ac power linearly.  dcpower=10∗acpower
- # inverter lost 90% of their power when it convert.
 
 plt.figure(dpi=100)
-sns.lmplot(x='AMBIENT_TEMPERATURE', y='DC_POWER', data=gen_wea)
+sns.lmplot(x='AMBIENT_TEMPERATURE', y='AC_POWER', data=gen_wea)
 plt.title('Regression plot')
 plt.show()
-# DC_power increases non linearly with an Ambient_Temperature.
+# AC_POWER increases non linearly with an Ambient_Temperature.
 
 plt.figure(dpi=100)
-sns.lmplot(x='MODULE_TEMPERATURE', y='DC_POWER', data=gen_wea)
+sns.lmplot(x='MODULE_TEMPERATURE', y='AC_POWER', data=gen_wea)
 plt.title('Regression plot')
 plt.show()
 
-# DC_POWER is produced linearly by MODULE_TEMPERATURE with some variability.
+# AC_POWER is produced linearly by MODULE_TEMPERATURE with some variability.
 
 plt.figure(dpi=100)
-sns.lmplot(x='IRRADIATION', y='DC_POWER', data=gen_wea)
+sns.lmplot(x='IRRADIATION', y='AC_POWER', data=gen_wea)
 plt.title('Regression plot')
 plt.show()
 
-# DC_Power increase with IRRADIATION.
-
-# What happens if I introuduce a difference Temperature between AMBIENT_TEMPERATURE AND MODULE_TEMPERATURE.
-# we introduce DELTA_TEMPERATURE
-gen_wea['DELTA_TEMPERATURE'] = abs(gen_wea.AMBIENT_TEMPERATURE - gen_wea.MODULE_TEMPERATURE)
-# we check if all is ok
-gen_wea.tail(3)
-
-# now we use correlation
-gen_wea.corr(method='spearman')['DELTA_TEMPERATURE']
-# we remark that YIELD does not depend on DELTA_TEMPERATURE also.
-sns.lmplot(x='DELTA_TEMPERATURE', y='DC_POWER', data=gen_wea)
-plt.title('correlation between DC_POWER and DELTA_TEMPERATURE')
-
-sns.lmplot(x='DELTA_TEMPERATURE', y='IRRADIATION', data=gen_wea)
-plt.title('Regression plot')
+# AC_POWER increase with IRRADIATION.
 
 # IRRADIATION of Module and Heat Transfert between ambient air and Module are very well correlated.
-#In this section, we conclude that:
-#Yield does not depend on the Temperature, the dc/ac power and irradiation.
-#the transfert function between dc and ac power is linear.
-#dc power is indeed influenced by the ambient temperature, by the temperature of the module, by the irradiation and finally by the heat transfer between the module and the air.
-#all 22 Inverters of Plant I lost 90% of their dc power when it convert.
+# AC_POWER is indeed influenced by the ambient temperature, by the temperature of the module
+# and by the irradiation.
+
 
