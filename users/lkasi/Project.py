@@ -42,6 +42,7 @@ print(data.isnull().sum())
 # Conclusion: There are no missing values.
 
 # Histogram of all columns
+
 plt.figure(figsize=(12, 6))
 data.hist(bins=20, color='skyblue', edgecolor='black', grid=False, layout=(3, 3))
 plt.tight_layout()
@@ -58,7 +59,7 @@ def count_zero(df):
     return zero_count
 
 zero_counts = count_zero(data)
-print("Number of "0" values in each columns.")
+print("""Number of "0" values in each columns.""")
 for column, count in zero_counts.items():
     print(column, ":", count)
 
@@ -69,9 +70,9 @@ for column, count in zero_counts.items():
 
 # Removing outliers
 def removing_outliers(df, columns):
-    all_indices_to_keep = np.ones(len(data), dtype=bool)
+    all_indices_to_keep = np.ones(len(df), dtype=bool)
     for column in columns:
-        column_data = data[column]
+        column_data = df[column]
         Q1 = np.percentile(column_data, 25)
         Q3 = np.percentile(column_data, 75)
         IQR = Q3 - Q1
@@ -79,7 +80,7 @@ def removing_outliers(df, columns):
         upper_bound = Q3 + 1.5 * IQR
         indices_to_keep = (column_data >= lower_bound) & (column_data <= upper_bound)
         all_indices_to_keep &= indices_to_keep
-    return data[all_indices_to_keep]
+    return df[all_indices_to_keep]
 
 cleaned_data = removing_outliers(data, columns=['Glucose', 'BloodPressure', 'BMI'])
 
@@ -93,7 +94,6 @@ for column, count in zero_counts.items():
 plt.figure(figsize=(12, 6))
 cleaned_data.hist(bins=20, color='skyblue', edgecolor='black', grid=False, layout=(3, 3))
 plt.tight_layout()
-plt.show()
 
 print("Shape of cleaning dataset: ")
 print(cleaned_data.shape)
@@ -140,10 +140,6 @@ accuracy = model.score(X_test, Y_test)
 print("Model accuracy: ", accuracy)
 
 # Conclusion: Model accuracy is 78%. I think that's quite good.
-def score(self, X_test, Y_test):
-    preds = self.predict(X_test)
-    accuracy = sum(preds == Y_test) / len(Y_test)
-    return accuracy
 
 preds = model.predict(X_test)
 con_matrix = metrics.confusion_matrix(Y_test, preds)
@@ -153,4 +149,5 @@ sns.heatmap(con_matrix, annot=True, fmt=".0f")
 #Conclusion:
 # Model accuracy is 78%, it's a quite good score.
 # However, 28 samples were incorrectly classified as negative - for disease classification
-# this value should be as low as possible.
+# this value should be as low as possible. This is 10% of all sample tested.
+# This result should be worked on.
