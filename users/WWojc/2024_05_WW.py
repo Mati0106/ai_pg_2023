@@ -25,7 +25,6 @@ generation_data.describe()
 print('The number of inverter for data_time {} is {}'.format('16-05-2020 00:15',
 generation_data[generation_data.DATE_TIME == '16-05-2020 00:15']['SOURCE_KEY'].nunique()))
 
-
 # In this solar plant, we have 22 inverters, used to change DC power to AC power.
 # Data set including data about energy production [kW] from every inverters (each inverters has name "source key")
 # recorded in 15 minutes interval,
