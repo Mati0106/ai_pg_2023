@@ -65,6 +65,7 @@ print(data.head())
 data.hist(bins=80,figsize=(13, 9))
 plt.tight_layout()
 plt.show()
+#
 
 missing_values = data.isnull().sum()
 print(missing_values)
